@@ -67,18 +67,21 @@ def data_set_split(X, Y, test_size=0.3):
 
 def create_cnn_model():
     model = Sequential()
-    model.add(Conv2D(32, 3, padding="same", activation="relu", input_shape=(224, 224, 3)))
-    model.add(MaxPool2D())
+    model.add(Conv2D(32, (3,3), padding="same", activation="relu", input_shape=(224, 224, 3)))
+    model.add(Dropout(0.25))
+    model.add(MaxPool2D(2,2))
 
-    model.add(Conv2D(32, 3, padding="same", activation="relu"))
-    model.add(MaxPool2D())
+    model.add(Conv2D(64, (3,3), padding="same", activation="relu"))
+    model.add(Dropout(0.25))
+    model.add(MaxPool2D(2,2))
 
-    model.add(Conv2D(64, 3, padding="same", activation="relu"))
-    model.add(MaxPool2D())
+    model.add(Conv2D(64, (3,3), padding="same", activation="relu"))
+    model.add(Dropout(0.25))
+    model.add(MaxPool2D(2,2))
     model.add(Dropout(0.4))
 
     model.add(Flatten())
-    model.add(Dense(128, activation="relu"))
+    model.add(Dense(46, activation="relu"))
     model.add(Dense(2, activation="softmax"))
     model.compile(optimizer='Adam', loss='sparse_categorical_crossentropy', metrics='accuracy')
     return model
@@ -118,7 +121,7 @@ if __name__ == "__main__":
 
     ##train
     model = create_cnn_model()
-    history = model.fit(X_train, y_train, epochs=10)
+    history = model.fit(X_train, y_train, epochs=20)
 
     ##predit
     pred = model.predict(X_test)
@@ -126,12 +129,13 @@ if __name__ == "__main__":
     df_pred = pd.DataFrame(pred, columns=["predict_true", "predict_error"])
     df_pred["true"] = y_test
 
-    model.save("./models/PLine_error_detect.v1.0.0.h5")
+    model.save("./models/PLine-CNN-Model.v1.0.0.h5")
 
     #############test################
-    model = load_model("./models/PLine_error_detect.v1.0.0.h5")
+    model = load_model("./models/PLine-CNN-Model.v1.0.0.h5")
     pred = model.predict(X_test)
     df_pred = pd.DataFrame(pred, columns=["predict_true", "predict_error"])
+
     df_pred["true"] = y_test
 
     df_pred.to_csv("result.csv", encoding='utf-8-sig', index=False)
